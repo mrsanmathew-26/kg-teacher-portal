@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Birla Public School – KG Teacher Portal v2.0</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#0C7E6A;--teal2:#0a6657;--teal-l:#E1F5EE;--teal-m:#9FE1CB;
+  --coral:#D85A30;--coral-l:#FAECE7;
+  --amber:#BA7517;--amber-l:#FAEEDA;
+  --purple:#534AB7;--purple-l:#EEEDFE;
+  --blue:#185FA5;--blue-l:#E6F1FB;
+  --green:#3B6D11;--green-l:#EAF3DE;
+  --gray:#5F5E5A;--gray-l:#F1EFE8;--gray-m:#D3D1C7;--gray-d:#2C2C2A;
+  --ff:'Nunito',sans-serif;--radius:12px;--radius-sm:8px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+body{font-family:var(--ff);background:#ECEAE3;color:var(--gray-d);font-size:14px}
+/* TOPBAR */
+.topbar{background:var(--teal);height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.tb-name{font-size:14px;font-weight:900;color:#fff;line-height:1.3}
+.tb-sub{font-size:10px;color:var(--teal-m);font-weight:700}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal-m);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--teal2);font-size:12px;flex-shrink:0}
+.tb-uname{font-size:12px;font-weight:800;color:#fff}
+.tb-urole{font-size:10px;color:var(--teal-m)}
+.tb-signout{font-family:var(--ff);font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;border:none;cursor:pointer;background:rgba(255,255,255,.18);color:#fff}
+.tb-signout:hover{background:rgba(255,255,255,.28)}
+/* LAYOUT */
+.main-wrap{display:flex;height:calc(100vh - 56px)}
+.sidebar{width:208px;background:#fff;border-right:1px solid var(--gray-m);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sb-sect{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);padding:14px 18px 5px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:12px;font-weight:700;color:var(--gray);cursor:pointer;border-left:3px solid transparent;transition:all .12s}
+.sb-item:hover{background:var(--gray-l);color:var(--gray-d)}
+.sb-item.active{background:var(--teal-l);color:var(--teal);border-left-color:var(--teal)}
+.sb-item .ic{font-size:15px;width:20px;text-align:center}
+.sb-divider{height:1px;background:var(--gray-m);margin:8px 14px}
+.sb-bottom{margin-top:auto;border-top:1px solid var(--gray-m)}
+.content-area{flex:1;overflow-y:auto;padding:22px 24px;background:#ECEAE3}
+/* LOGIN */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#d8f0e8 0%,#eceae3 100%)}
+.login-card{background:#fff;border-radius:20px;padding:44px 40px;width:420px;box-shadow:0 10px 48px rgba(0,0,0,.13);text-align:center}
+.login-logo{width:68px;height:68px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px}
+.login-title{font-size:21px;font-weight:900;color:var(--gray-d);margin-bottom:3px}
+.login-sub{font-size:12px;color:var(--gray);margin-bottom:6px}
+.demo-badge{display:inline-block;background:var(--amber-l);color:var(--amber);font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;margin-bottom:22px}
+.lf label{display:block;font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;text-align:left}
+.lf select,.lf input{width:100%;padding:9px 12px;border:1.5px solid var(--gray-m);border-radius:var(--radius-sm);font-family:var(--ff);font-size:13px;background:var(--gray-l);color:var(--gray-d);transition:border .15s;margin-bottom:13px}
+.lf select:focus,.lf input:focus{outline:none;border-color:var(--teal)}
+.login-preview{background:var(--teal-l);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;text-align:left;margin-bottom:14px;line-height:1.9;color:var(--gray-d)}
+.login-btn{width:100%;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;transition:background .15s;margin-top:4px}
+.login-btn:hover{background:var(--teal2)}
+.login-ms{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:9px;background:#fff;border:1.5px solid var(--gray-m);border-radius:var(--radius-sm);font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;margin-top:9px;color:var(--gray-d);transition:background .15s}
+.login-ms:hover{background:var(--gray-l)}
+/* SHARED */
+.page-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.page-title{font-size:19px;font-weight:900;color:var(--gray-d)}
+.page-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.card{background:#fff;border-radius:var(--radius);padding:18px;border:1px solid var(--gray-m);margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:800;color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+/* BUTTONS */
+.btn{font-family:var(--ff);font-size:11px;font-weight:800;padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-teal:hover:not(:disabled){background:var(--teal2)}
+.btn-outline{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+.btn-outline:hover:not(:disabled){background:var(--teal-l)}
+.btn-gray{background:var(--gray-l);color:var(--gray);border:1.5px solid var(--gray-m)}
+.btn-purple{background:var(--purple-l);color:var(--purple);border:1.5px solid var(--purple)}
+.btn-coral{background:var(--coral-l);color:var(--coral);border:1.5px solid var(--coral)}
+.btn-amber{background:var(--amber-l);color:var(--amber);border:1.5px solid var(--amber)}
+/* BADGES */
+.badge{display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px}
+.badge-teal{background:var(--teal-l);color:var(--teal)}
+.badge-coral{background:var(--coral-l);color:var(--coral)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}
+.badge-blue{background:var(--blue-l);color:var(--blue)}
+.badge-green{background:var(--green-l);color:var(--green)}
+.badge-gray{background:var(--gray-l);color:var(--gray)}
+.badge-purple{background:var(--purple-l);color:var(--purple)}
+.status-draft{background:var(--amber-l);color:var(--amber)}
+.status-review{background:var(--blue-l);color:var(--blue)}
+.status-final{background:var(--green-l);color:var(--green)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:11px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:#fff;box-shadow:0 4px 18px rgba(0,0,0,.22);animation:slideUp .25s ease}
+.toast-success{background:var(--teal)}
+.toast-error{background:var(--coral)}
+.toast-info{background:var(--blue)}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* FORM */
+.fl{display:block;font-size:10px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.fi,.fs,.fta{width:100%;padding:8px 11px;border:1.5px solid var(--gray-m);border-radius:var(--radius-sm);font-family:var(--ff);font-size:13px;background:var(--gray-l);color:var(--gray-d);transition:border .15s}
+.fta{resize:vertical}
+.fi:focus,.fs:focus,.fta:focus{outline:none;border-color:var(--teal);background:var(--teal-l)}
+.fg{margin-bottom:12px}
+.ph{font-size:9px;font-weight:700;background:var(--purple-l);color:var(--purple);padding:1px 6px;border-radius:3px;margin-left:5px;font-family:monospace}
+.req{color:var(--coral);font-weight:900;margin-left:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+/* FORM BLOCKS */
+.fb{background:#fff;border-radius:var(--radius);padding:18px 20px;margin-bottom:13px;border:1px solid var(--gray-m);box-shadow:var(--shadow)}
+.fb-title{font-size:11px;font-weight:900;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--teal-l);display:flex;align-items:center;gap:7px}
+/* FORM TABS */
+.ftabs{display:flex;gap:3px;background:var(--gray-l);padding:4px;border-radius:var(--radius-sm);margin-bottom:14px;overflow-x:auto}
+.ftab{flex:1;padding:7px 10px;font-family:var(--ff);font-size:11px;font-weight:800;border:none;border-radius:6px;background:transparent;color:var(--gray);cursor:pointer;transition:all .15s;white-space:nowrap}
+.ftab.active{background:#fff;color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+/* DAY ROW */
+.day-row{background:var(--gray-l);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:10px;border-left:4px solid var(--teal)}
+.day-lbl{font-size:12px;font-weight:900;color:var(--teal);margin-bottom:9px}
+/* DIFF */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.diff-card{border-radius:var(--radius-sm);padding:12px;border:1.5px solid}
+.d-high{background:#f0fff4;border-color:#48bb78}
+.d-med{background:#fffbeb;border-color:#ecc94b}
+.d-low{background:#fff5f5;border-color:#fc8181}
+.d-lbl{font-size:11px;font-weight:900;margin-bottom:8px}
+.d-ta{width:100%;padding:7px 9px;border:1.5px solid;border-radius:6px;font-family:var(--ff);font-size:12px;resize:vertical;background:transparent}
+.d-high .d-ta{border-color:#48bb78}
+.d-med .d-ta{border-color:#ecc94b}
+.d-low .d-ta{border-color:#fc8181}
+.d-ta:focus{outline:none}
+/* EXPORT BAR */
+.xbar{background:#fff;border-radius:var(--radius);padding:13px 18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--gray-m);margin-top:18px;box-shadow:0 -2px 12px rgba(0,0,0,.06);position:sticky;bottom:0}
+/* PLAN LIST */
+.plan-item{background:#fff;border-radius:var(--radius-sm);padding:13px 16px;border:1px solid var(--gray-m);display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;cursor:pointer;transition:all .14s;box-shadow:var(--shadow)}
+.plan-item:hover{border-color:var(--teal);background:var(--teal-l)}
+.plan-name{font-size:13px;font-weight:800;color:var(--gray-d)}
+.plan-meta{font-size:11px;color:var(--gray);margin-top:2px}
+/* TEMPLATE GRID */
+.tmpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.tmpl-card{background:#fff;border:2px solid var(--gray-m);border-radius:var(--radius);padding:16px 14px;cursor:pointer;transition:all .16s;text-align:center;box-shadow:var(--shadow)}
+.tmpl-card:hover{border-color:var(--teal);background:var(--teal-l);transform:translateY(-2px)}
+.tmpl-card.sel{border-color:var(--teal);background:var(--teal-l)}
+.tmpl-icon{font-size:34px;margin-bottom:8px}
+.tmpl-name{font-size:12px;font-weight:800;color:var(--gray-d);margin-bottom:3px}
+.tmpl-desc{font-size:10px;color:var(--gray);margin-bottom:7px}
+/* ATTENDANCE */
+.att-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.att-tbl th{background:var(--teal);color:#fff;padding:8px 10px;font-size:10px;font-weight:800;text-align:center}
+.att-tbl th:first-child{text-align:left;padding-left:14px}
+.att-tbl td{padding:7px 10px;border-bottom:1px solid var(--gray-m);text-align:center;vertical-align:middle}
+.att-tbl td:first-child{text-align:left;padding-left:14px;font-weight:700;font-size:12px}
+.att-tbl tr:hover td{background:var(--teal-l)}
+.att-btn{padding:4px 11px;border-radius:5px;font-size:10px;font-weight:800;cursor:pointer;border:none;font-family:var(--ff)}
+.att-P{background:var(--green-l);color:var(--green)}
+.att-A{background:var(--coral-l);color:var(--coral)}
+.att-L{background:var(--amber-l);color:var(--amber)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center;z-index:500}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;width:min(92vw,700px);max-height:88vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.25)}
+.modal-hdr{font-size:15px;font-weight:900;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{cursor:pointer;font-size:20px;color:var(--gray);line-height:1}
+.ptbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+.ptbl th{background:var(--teal);color:#fff;padding:6px 8px;text-align:left;font-size:10px}
+.ptbl td{padding:6px 8px;border-bottom:1px solid var(--gray-m);vertical-align:top}
+.ptbl tr:nth-child(even) td{background:var(--gray-l)}
+.psect h3{font-size:12px;font-weight:900;color:var(--teal);margin:12px 0 6px;padding-bottom:3px;border-bottom:1px solid var(--teal-l)}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat-card{background:#fff;border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--gray-m);box-shadow:var(--shadow)}
+.stat-num{font-size:26px;font-weight:900}
+.stat-lbl{font-size:10px;color:var(--gray);font-weight:700;margin-top:1px}
+/* ACTIVITY CHIPS */
+.chip-pool{display:flex;flex-wrap:wrap;gap:7px;padding:12px;background:var(--gray-l);border-radius:var(--radius-sm);min-height:56px;border:2px dashed var(--gray-m);margin-bottom:10px}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;user-select:none;transition:all .12s}
+.chip:hover{transform:scale(1.05)}
+/* HELP */
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.help-card{background:#fff;border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--gray-m);box-shadow:var(--shadow)}
+.help-card h4{font-size:13px;font-weight:800;color:var(--teal);margin-bottom:6px}
+.help-card p,.help-card li{font-size:12px;color:var(--gray);line-height:1.7}
+.help-card ul{padding-left:16px}
+.fgtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.fgtbl th{background:var(--teal);color:#fff;padding:7px 10px;text-align:left;font-size:11px}
+.fgtbl td{padding:7px 10px;border-bottom:1px solid var(--gray-m)}
+.fgtbl tr:nth-child(even) td{background:var(--gray-l)}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--gray-m);border-radius:3px}
+/* PRINT */
+@media print{.topbar,.sidebar,.xbar,.ftabs,.btn,.no-print{display:none!important}.main-wrap{display:block}.content-area{padding:0}.card{box-shadow:none;break-inside:avoid}}
+@media(max-width:768px){.sidebar{display:none}.stats-grid{grid-template-columns:1fr 1fr}.g2,.g3,.g4,.diff-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+/* ═══════════════════════════════════════════
+   DOCX GENERATOR  — matches uploaded template
+═══════════════════════════════════════════ */
+async function generateDocx(form) {
+  const {
+    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+    AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign, UnderlineType
+  } = docx;
+
+  const T='1F7A6E',LT='E0F0EE',LB='D5E8F0',LY='FFF9E6',LP='FDF0F5',
+        W='FFFFFF',DG='2C2C2A',MG='888780',LG='F5F5F3';
+  const b0={style:BorderStyle.NONE,size:0,color:'FFFFFF'};
+  const bt=(c='CCCCCC')=>({style:BorderStyle.SINGLE,size:6,color:c});
+  const bAll=(c='CCCCCC')=>({top:bt(c),bottom:bt(c),left:bt(c),right:bt(c)});
+  const b0All={top:b0,bottom:b0,left:b0,right:b0};
+  const cm={top:80,bottom:80,left:120,right:120};
+  const cs={top:55,bottom:55,left:100,right:100};
+
+  const R=(t,o={})=>new TextRun({text:t,font:'Arial',size:20,color:DG,...o});
+  const Rb=(t,o={})=>R(t,{bold:true,...o});
+  const Ri=(t,o={})=>R(t,{italics:true,...o});
+  const Ru=(t,o={})=>R(t,{bold:true,underline:{type:UnderlineType.SINGLE},...o});
+  const P=(r,o={})=>new Paragraph({children:Array.isArray(r)?r:[r],spacing:{after:60},...o});
+  const Pg=()=>new Paragraph({children:[R('',{size:8})],spacing:{after:0}});
+
+  const Cell=(ch,fill=W,opts={})=>new TableCell({
+    borders:bAll('CCCCCC'),shading:{fill,type:ShadingType.CLEAR},
+    margins:cm,verticalAlign:VerticalAlign.TOP,
+    children:Array.isArray(ch)?ch:[ch],...opts
+  });
+  const HCell=(t,fill=T,opts={})=>new TableCell({
+    borders:bAll(T),shading:{fill,type:ShadingType.CLEAR},margins:cm,
+    verticalAlign:VerticalAlign.CENTER,
+    children:[P([Rb(t,{color:W,size:19})],{alignment:AlignmentType.CENTER})],...opts
+  });
+  const W_=10466;
+
+  const doc=new Document({
+    sections:[{
+      properties:{page:{size:{width:11906,height:16838},margin:{top:720,right:720,bottom:720,left:720}}},
+      children:[
+        // ── SCHOOL HEADER
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[W_],rows:[
+          new TableRow({children:[new TableCell({
+            borders:bAll(T),shading:{fill:T,type:ShadingType.CLEAR},
+            margins:{top:140,bottom:140,left:200,right:200},
+            children:[
+              P([Rb('Birla Public School, Doha – Qatar',{size:28,color:W})],{alignment:AlignmentType.CENTER}),
+              P([Rb('Kindergarten Curriculum Plan',{size:22,color:W})],{alignment:AlignmentType.CENTER}),
+              P([Rb('Lesson Plan 2025 – 26',{size:20,color:W})],{alignment:AlignmentType.CENTER}),
+            ]
+          })]}),
+        ]}),
+        Pg(),
+        // ── INFO ROW
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[2400,1400,4266,2400],rows:[
+          new TableRow({children:[
+            Cell([P([Rb('From: ',{size:18}),R(`${form.dateFrom} to ${form.dateTo} ${form.month}`,{size:18})])],LB),
+            Cell([P([Rb('Grade: ',{size:18}),Rb(form.grade,{size:18})])],LB),
+            Cell([P([Rb("Teacher's Name: ",{size:18}),R(form.teacherName,{size:18})])],LB),
+            Cell([P([Rb('Subject: ',{size:18}),Rb(form.subject,{size:18})])],LB),
+          ]}),
+          new TableRow({children:[
+            new TableCell({columnSpan:3,borders:bAll('CCCCCC'),shading:{fill:LY,type:ShadingType.CLEAR},margins:cm,
+              children:[P([Rb('Theme: ',{size:18}),R(form.theme,{size:18}),Rb('     Topic: ',{size:18}),R(form.topic,{size:18})])]}),
+            Cell([P([Rb('No. of Periods: ',{size:18}),Rb(form.periods,{size:18})])],LY),
+          ]}),
+        ]}),
+        Pg(),
+        // ── RESOURCES / VOCAB / FEEDBACK
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[W_],rows:[
+          new TableRow({children:[new TableCell({
+            borders:bAll(T),shading:{fill:LT,type:ShadingType.CLEAR},margins:cs,
+            children:[
+              P([Rb('Learning Resources',{color:T,size:20})]),
+              ...form.resources.filter(r=>r.trim()).map((r,i)=>P([R(`${i+1}.  ${r}`,{size:18})],{indent:{left:200}})),
+              form.websiteLinks?P([Rb('Website Links: ',{color:T,size:18}),R(form.websiteLinks,{size:18,color:'1155CC'})]):Pg(),
+              form.interactiveGames?P([Rb('Interactive Games: ',{color:T,size:18}),R(form.interactiveGames,{size:18})]):Pg(),
+            ]
+          })]}),
+          new TableRow({children:[new TableCell({
+            borders:bAll('CCCCCC'),margins:cm,
+            children:[P([Rb('New Terminology / Vocabulary: ',{color:T,size:19}),R(form.vocabulary,{size:18})])]
+          })]}),
+          new TableRow({children:[new TableCell({
+            borders:bAll('CCCCCC'),shading:{fill:LY,type:ShadingType.CLEAR},margins:cm,
+            children:[P([Rb('Feedback on previous week: ',{color:T,size:19})]),P([R(form.feedback||'',{size:18})])]
+          })]}),
+        ]}),
+        Pg(),
+        // ── WEEKLY SCHEDULE TABLE
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[1300,2200,4166,2800],rows:[
+          new TableRow({tableHeader:true,children:[
+            HCell('Week'),HCell('Learning Objectives'),
+            HCell('Lesson Presentation / Activity / Methodology'),
+            HCell('Assignment / Assessment / SDG'),
+          ]}),
+          new TableRow({children:[
+            new TableCell({rowSpan:7,borders:bAll(T),shading:{fill:LT,type:ShadingType.CLEAR},margins:cs,verticalAlign:VerticalAlign.TOP,
+              children:[
+                P([Ru(form.month,{color:T,size:18})]),
+                P([Rb(form.weekLabel||'Week 1',{size:18})]),
+                Pg(),
+                P([Ru(form.subject.toUpperCase(),{color:T,size:18})]),
+              ]
+            }),
+            new TableCell({rowSpan:7,borders:bAll('CCCCCC'),margins:cs,verticalAlign:VerticalAlign.TOP,
+              children:form.objectives.filter(o=>o.trim()).length?
+                form.objectives.filter(o=>o.trim()).map((o,i)=>P([R(`${i+1}. ${o}`,{size:17})],{spacing:{after:80}})):
+                [P([R('(not entered)',{size:17,color:MG})])]
+            }),
+            Cell([
+              P([Ru('QNI:',{size:18})]),P([R(form.qni||'',{size:17})]),Pg(),
+              P([Ru('Daily Reflection:',{size:18})]),P([R(form.dailyReflection||'',{size:17})]),
+            ],W),
+            Cell([P([Ru('SDG:',{size:18})]),P([R(form.sdg||'',{size:17})])],LT),
+          ]}),
+          ...form.schedule.map((s,i)=>new TableRow({children:[
+            Cell([P([Ru(s.day,{size:18})]),Pg(),P([R(s.activity||'',{size:17})])],i%2?'FAFAF8':W),
+            Cell([
+              P([Ru('Classwork:',{size:17})]),P([R(s.classwork||'Worksheets / Notebook',{size:17})],{indent:{left:120}}),Pg(),
+              P([Ru('Homework:',{size:17})]),P([R(s.homework||'Worksheets / Notebook',{size:17})],{indent:{left:120}}),
+            ],i%2?'FAFAF8':W),
+          ]})),
+          new TableRow({children:[
+            new TableCell({columnSpan:2,borders:bAll('CCCCCC'),shading:{fill:LP,type:ShadingType.CLEAR},margins:cs,
+              children:[
+                P([Ru('Differentiated Learning',{color:T,size:19})]),Pg(),
+                P([Rb('🟢 High: ',{size:17}),R(form.diffHigh||'',{size:17})]),Pg(),
+                P([Rb('🟡 Medium: ',{size:17}),R(form.diffMed||'',{size:17})]),Pg(),
+                P([Rb('🔴 Low: ',{size:17}),R(form.diffLow||'',{size:17})]),
+              ]
+            }),
+          ]}),
+        ]}),
+        Pg(),
+        // ── INTEGRATION / HOME PRACTICE / REFLECTION
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[W_],rows:[
+          new TableRow({children:[new TableCell({
+            borders:bAll(T),shading:{fill:LT,type:ShadingType.CLEAR},margins:cm,
+            children:[
+              P([Rb('Integration:',{color:T,size:20})]),Pg(),
+              ...[['Literacy',form.intLiteracy],['Numeracy',form.intNumeracy],['Knowing the World',form.intWorld],
+                  ['Art',form.intArt],['Story / Rhymes / Poems',form.intStory],['Music / Song',form.intMusic],['Games',form.intGames]
+              ].map(([k,v])=>P([Ri(`${k} – `,{size:18}),R(v||'',{size:18})]))
+            ]
+          })]}),
+          new TableRow({children:[new TableCell({
+            borders:bAll('CCCCCC'),margins:cm,
+            children:[P([Rb('Home Practice:',{color:T,size:20})]),P([R(form.homePractice||'',{size:18})])]
+          })]}),
+          new TableRow({children:[new TableCell({
+            borders:bAll('CCCCCC'),shading:{fill:LY,type:ShadingType.CLEAR},margins:cm,
+            children:[
+              P([Ri('Please tick the boxes which you have done / planned for the week.',{size:17,color:MG})]),Pg(),
+              P([
+                Rb(`${form.valuesCheck?'☑':'☐'} Values  `,{size:17}),
+                Rb(`${form.resourcesCheck?'☑':'☐'} Resources  `,{size:17}),
+                Rb(`${form.assignCheck?'☑':'☐'} Assignments  `,{size:17}),
+                Rb(`${form.sdgCheck?'☑':'☐'} SDG  `,{size:17}),
+                Rb(`${form.activitiesCheck?'☑':'☐'} Activities  `,{size:17}),
+                Rb(`${form.worksheetsCheck?'☑':'☐'} Worksheets`,{size:17}),
+              ]),
+            ]
+          })]}),
+          new TableRow({children:[new TableCell({
+            borders:bAll(T),shading:{fill:LT,type:ShadingType.CLEAR},margins:cm,
+            children:[P([Rb("Teacher's Reflection:",{color:T,size:20})]),P([R(form.reflection||'',{size:18})])]
+          })]}),
+        ]}),
+        Pg(),
+        // ── FOOTER
+        new Table({width:{size:W_,type:WidthType.DXA},columnWidths:[7466,3000],rows:[
+          new TableRow({children:[
+            Cell([P([R(`Lesson Plan – ${form.grade} – 2025-26`,{size:16,color:MG})])],LG),
+            Cell([P([R(form.teacherName,{size:16,color:MG})],{alignment:AlignmentType.RIGHT})],LG),
+          ]})
+        ]}),
+      ]
+    }]
+  });
+  return await Packer.toBuffer(doc);
+}
+
+/* ═══════════════════════════════════════════
+   DATA / CONSTANTS
+═══════════════════════════════════════════ */
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday'];
+const MOCK_USERS=[
+  {name:'Ms. Priya Sharma',   initials:'PS',grade:'KG2',subject:'Literacy', section:'A'},
+  {name:'Ms. Fatima Al-Ali',  initials:'FA',grade:'KG1',subject:'Numeracy', section:'B'},
+  {name:'Ms. Ananya Krishnan',initials:'AK',grade:'KG2',subject:'Art',      section:'A'},
+  {name:'Mr. Ranjit Nair',    initials:'RN',grade:'KG1',subject:'Literacy', section:'C'},
+];
+const TEMPLATES=[
+  {id:'lp-lit', name:'Literacy Lesson Plan',  icon:'📚',grade:'KG2',subject:'Literacy', desc:'Phonics, reading & writing'},
+  {id:'lp-num', name:'Numeracy Lesson Plan',  icon:'🔢',grade:'KG2',subject:'Numeracy', desc:'Numbers, shapes & patterns'},
+  {id:'lp-kg1', name:'KG1 Literacy Plan',     icon:'🌟',grade:'KG1',subject:'Literacy', desc:'Simplified for KG1'},
+  {id:'lp-art', name:'Art & Craft Plan',      icon:'🎨',grade:'BOTH',subject:'Art',     desc:'Creative activities'},
+  {id:'lp-gen', name:'General Studies Plan',  icon:'🌍',grade:'BOTH',subject:'General', desc:'Knowing the world'},
+  {id:'ws',     name:'Activity Worksheet',    icon:'✏️',grade:'BOTH',subject:'General', desc:'Printable classroom sheet'},
+  {id:'nl',     name:'Parent Newsletter',     icon:'📰',grade:'BOTH',subject:'General', desc:'Weekly parent update'},
+  {id:'rc',     name:'Report Card',           icon:'📊',grade:'BOTH',subject:'General', desc:'Student progress report'},
+];
+const SAVED_PLANS=[
+  {id:1,title:'My Family – Literacy Week 18',date:'08–10 Apr 2025',grade:'KG2',subject:'Literacy',status:'final'},
+  {id:2,title:'Numbers 1–10 – Numeracy Week 17',date:'01–05 Apr 2025',grade:'KG2',subject:'Numeracy',status:'review'},
+  {id:3,title:'Colours & Shapes – Art Week 16',date:'25–29 Mar 2025',grade:'KG2',subject:'Art',status:'draft'},
+];
+const MOCK_STUDENTS=[
+  {id:1,name:'Aisha Al-Mansouri',level:'H',att:{Sun:'P',Mon:'P',Tue:'P',Wed:'A',Thu:'P'}},
+  {id:2,name:'Rania Hassan',     level:'M',att:{Sun:'P',Mon:'L',Tue:'P',Wed:'P',Thu:'P'}},
+  {id:3,name:'Yusuf Al-Farsi',   level:'M',att:{Sun:'A',Mon:'P',Tue:'P',Wed:'P',Thu:'P'}},
+  {id:4,name:'Sara Benmoussa',   level:'H',att:{Sun:'P',Mon:'P',Tue:'A',Wed:'P',Thu:'P'}},
+  {id:5,name:'Khalid Al-Rashidi',level:'L',att:{Sun:'P',Mon:'P',Tue:'P',Wed:'P',Thu:'L'}},
+  {id:6,name:'Nour El-Din',      level:'M',att:{Sun:'P',Mon:'P',Tue:'P',Wed:'P',Thu:'P'}},
+  {id:7,name:'Layla Mahmoud',    level:'H',att:{Sun:'L',Mon:'P',Tue:'P',Wed:'P',Thu:'P'}},
+  {id:8,name:'Omar Qasim',       level:'L',att:{Sun:'P',Mon:'A',Tue:'P',Wed:'P',Thu:'P'}},
+];
+const ACTIVITY_CHIPS=[
+  {label:'Circle Time',color:'#0C7E6A',bg:'#E1F5EE'},{label:'Flashcards',color:'#185FA5',bg:'#E6F1FB'},
+  {label:'Big Book',color:'#534AB7',bg:'#EEEDFE'},{label:'Song & Rhyme',color:'#BA7517',bg:'#FAEEDA'},
+  {label:'Worksheet',color:'#D85A30',bg:'#FAECE7'},{label:'Art Activity',color:'#3B6D11',bg:'#EAF3DE'},
+  {label:'Phonics Game',color:'#0C7E6A',bg:'#E1F5EE'},{label:'Story Time',color:'#534AB7',bg:'#EEEDFE'},
+  {label:'Outdoor Play',color:'#3B6D11',bg:'#EAF3DE'},{label:'Show & Tell',color:'#BA7517',bg:'#FAEEDA'},
+  {label:'Number Activity',color:'#185FA5',bg:'#E6F1FB'},{label:'Partner Work',color:'#D85A30',bg:'#FAECE7'},
+];
+const emptyForm=()=>({
+  dateFrom:'',dateTo:'',month:'',grade:'KG2',teacherName:'',subject:'Literacy',
+  theme:'',topic:'',periods:'5',weekLabel:'',
+  resources:['','','',''],websiteLinks:'',interactiveGames:'',
+  vocabulary:'',feedback:'',
+  objectives:['','',''],qni:'',dailyReflection:'',sdg:'',
+  schedule:DAYS.map(d=>({day:d,activity:'',classwork:'Worksheets / Notebook',homework:'Worksheets / Notebook'})),
+  diffHigh:'',diffMed:'',diffLow:'',
+  intLiteracy:'',intNumeracy:'',intWorld:'',intArt:'',intStory:'',intMusic:'',intGames:'',
+  homePractice:'',
+  valuesCheck:false,resourcesCheck:false,assignCheck:false,sdgCheck:false,activitiesCheck:false,worksheetsCheck:false,
+  reflection:'',
+});
+
+/* ── LOCAL STORAGE HELPERS ── */
+const LS_KEY='bps_kg_plans_v1';
+const LS_ATT='bps_kg_att_v1';
+const LS_GRADES='bps_kg_grades_v1';
+function lsGet(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch{return def;}}
+function lsSet(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
+
+/* ── FORM VALIDATION ── */
+function validateForm(form){
+  const errs=[];
+  if(!form.teacherName.trim()) errs.push('Teacher Name');
+  if(!form.dateFrom.trim())    errs.push('Date From');
+  if(!form.dateTo.trim())      errs.push('Date To');
+  if(!form.month.trim())       errs.push('Month & Year');
+  if(!form.theme.trim())       errs.push('Theme');
+  if(!form.topic.trim())       errs.push('Topic');
+  if(!form.vocabulary.trim())  errs.push('Vocabulary');
+  if(!form.objectives.some(o=>o.trim())) errs.push('At least 1 Objective');
+  if(!form.diffHigh.trim())    errs.push('Differentiation – High');
+  if(!form.diffMed.trim())     errs.push('Differentiation – Medium');
+  if(!form.diffLow.trim())     errs.push('Differentiation – Low');
+  return errs;
+}
+
+/* ── WEEK AUTO-CALCULATOR ── */
+function getWeekLabel(){
+  const schoolStart=new Date('2025-09-01');
+  const now=new Date();
+  const diff=Math.floor((now-schoolStart)/(7*24*60*60*1000));
+  return diff>=0?`Week ${diff+1}`:'Week 1';
+}
+function getTodayMonth(){
+  return new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+}
+
+/* ═══════════════════════════════════════════
+   TINY HOOKS
+═══════════════════════════════════════════ */
+const {useState,useEffect,useRef,useCallback}=React;
+
+function useToast(){
+  const [toast,setToast]=useState(null);
+  const show=(msg,type='success')=>setToast({msg,type,k:Date.now()});
+  return {toast,show};
+}
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════ */
+function Toast({toast,onDone}){
+  useEffect(()=>{if(toast){const t=setTimeout(onDone,3200);return()=>clearTimeout(t);}},[toast]);
+  if(!toast)return null;
+  return <div className={`toast toast-${toast.type}`}>{toast.msg}</div>;
+}
+
+/* ── LOGIN ── */
+function LoginPage({onLogin}){
+  const [sel,setSel]=useState(0);
+  const u=MOCK_USERS[sel];
+  return(
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo">🏫</div>
+        <div className="login-title">Birla Public School</div>
+        <div className="login-sub">KG Teacher Portal · Doha, Qatar</div>
+        <div className="demo-badge">🔧 Demo Mode — Mock Login</div>
+        <div className="lf">
+          <label>Select Teacher Profile</label>
+          <select value={sel} onChange={e=>setSel(+e.target.value)}>
+            {MOCK_USERS.map((u,i)=><option key={i} value={i}>{u.name} – Grade {u.grade}</option>)}
+          </select>
+        </div>
+        <div className="login-preview">
+          <strong>👩‍🏫 {u.name}</strong><br/>
+          Grade {u.grade} &nbsp;·&nbsp; {u.subject} &nbsp;·&nbsp; Section {u.section}
+        </div>
+        <button className="login-btn" onClick={()=>onLogin(u)}>
+          Sign In as {u.name.split(' ')[0]}
+        </button>
+        <button className="login-ms" onClick={()=>onLogin(u)}>
+          <svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+          Sign in with Microsoft 365
+        </button>
+        <div style={{fontSize:10,color:'var(--gray)',marginTop:12}}>Microsoft SSO ready — connect your Azure tenant in production</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── TOPBAR ── */
+function Topbar({user,onSignOut}){
+  return(
+    <div className="topbar">
+      <div className="tb-brand">
+        <div className="tb-logo">🏫</div>
+        <div>
+          <div className="tb-name">Birla Public School</div>
+          <div className="tb-sub">KG Teacher Portal · Doha, Qatar</div>
+        </div>
+      </div>
+      <div className="tb-right">
+        <div className="tb-avatar">{user.initials}</div>
+        <div>
+          <div className="tb-uname">{user.name}</div>
+          <div className="tb-urole">Grade {user.grade} · {user.subject}</div>
+        </div>
+        <button className="tb-signout" onClick={onSignOut}>Sign Out</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── SIDEBAR ── */
+function Sidebar({tab,setTab}){
+  const nav=[
+    {id:'dashboard',ic:'🏠',label:'Dashboard'},
+    {id:'plans',ic:'📋',label:'Lesson Plans'},
+    {id:'worksheets',ic:'✏️',label:'Worksheets'},
+    {id:'attendance',ic:'📊',label:'Attendance'},
+    {id:'reports',ic:'📈',label:'Report Cards'},
+    {id:'communication',ic:'📧',label:'Parent Comms'},
+  ];
+  return(
+    <div className="sidebar">
+      <div className="sb-sect">Menu</div>
+      {nav.map(n=>(
+        <div key={n.id} className={`sb-item${tab===n.id?' active':''}`} onClick={()=>setTab(n.id)}>
+          <span className="ic">{n.ic}</span>{n.label}
+        </div>
+      ))}
+      <div className="sb-divider"/>
+      <div className="sb-sect">Tools</div>
+      <div className="sb-item" onClick={()=>{window.print()}}>
+        <span className="ic">🖨️</span>Print View
+      </div>
+      <div className="sb-item" onClick={()=>setTab('help')}>
+        <span className="ic">❓</span>Help Guide
+      </div>
+      <div className="sb-bottom">
+        <div className="sb-item" onClick={()=>setTab('settings')}>
+          <span className="ic">⚙️</span>Settings
+        </div>
+        <div style={{padding:'10px 18px',fontSize:9,color:'var(--gray-m)',fontWeight:700}}>
+          KG Teacher Portal v2.0<br/>
+          Birla Public School, Doha
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── DASHBOARD HOME ── */
+function Dashboard({user,setTab,show}){
+  return(
+    <div>
+      <div className="page-hdr">
+        <div>
+          <div className="page-title">Good morning, {user.name.split(' ')[0]} 👋</div>
+          <div className="page-sub">Grade {user.grade} · {user.subject} · {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+        </div>
+      </div>
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-num" style={{color:'var(--teal)'}}>3</div><div className="stat-lbl">Lesson Plans</div><div className="stat-sub" style={{color:'var(--green)'}}>✓ 1 final this week</div></div>
+        <div className="stat-card"><div className="stat-num" style={{color:'var(--blue)'}}>8</div><div className="stat-lbl">Students</div><div className="stat-sub" style={{color:'var(--gray)'}}>Grade {user.grade}-A</div></div>
+        <div className="stat-card"><div className="stat-num" style={{color:'var(--green)'}}>87%</div><div className="stat-lbl">Attendance Today</div><div className="stat-sub" style={{color:'var(--coral)'}}>1 absent today</div></div>
+        <div className="stat-card"><div className="stat-num" style={{color:'var(--coral)'}}>3</div><div className="stat-lbl">Parent Messages</div><div className="stat-sub" style={{color:'var(--gray)'}}>2 unread</div></div>
+      </div>
+      <div className="g2">
+        <div className="card">
+          <div className="card-title">⚡ Quick Actions</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <button className="btn btn-teal" style={{width:'100%',justifyContent:'center'}} onClick={()=>setTab('plans')}>+ New Lesson Plan</button>
+            <button className="btn btn-outline" style={{width:'100%',justifyContent:'center'}} onClick={()=>setTab('attendance')}>📊 Mark Attendance</button>
+            <button className="btn btn-outline" style={{width:'100%',justifyContent:'center'}} onClick={()=>setTab('communication')}>📧 Send Parent Message</button>
+            <button className="btn btn-outline" style={{width:'100%',justifyContent:'center'}} onClick={()=>setTab('reports')}>📈 Update Report Cards</button>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-title">📌 Recent Plans</div>
+          {SAVED_PLANS.map(p=>(
+            <div key={p.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:'1px solid var(--gray-m)'}}>
+              <div>
+                <div style={{fontSize:12,fontWeight:800}}>{p.title}</div>
+                <div style={{fontSize:10,color:'var(--gray)'}}>{p.date}</div>
+              </div>
+              <span className={`badge status-${p.status}`}>{p.status}</span>
+            </div>
+          ))}
+          <button className="btn btn-gray" style={{marginTop:10,width:'100%'}} onClick={()=>setTab('plans')}>View All Plans →</button>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-title">🧩 Activity Builder — Click to add activities to your week plan</div>
+        {lsGet('bps_draft_'+user.initials,null)&&(
+          <div style={{background:'var(--amber-l)',borderRadius:'var(--radius-sm)',padding:'8px 12px',marginBottom:10,fontSize:12,color:'var(--amber)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span>💾 You have an unsaved draft lesson plan</span>
+            <button className="btn btn-amber" style={{padding:'4px 12px',fontSize:11}} onClick={()=>setTab('plans')}>Continue Draft →</button>
+          </div>
+        )}
+        <div style={{fontSize:11,color:'var(--gray)',marginBottom:10}}>Click any chip to add it to your plan. Use this to plan your week visually.</div>
+        <div className="chip-pool">
+          {ACTIVITY_CHIPS.map((c,i)=>(
+            <div key={i} className="chip" style={{background:c.bg,color:c.color,borderColor:c.color}}
+              onClick={()=>show(`✓ "${c.label}" added to your activity list`,'info')}>
+              {c.label}
+            </div>
+          ))}
+        </div>
+        <div style={{fontSize:10,color:'var(--gray)',marginTop:6}}>💡 Tip: In the Lesson Plan form, copy your chosen activities into the daily schedule fields.</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── LESSON PLAN FORM ── */
+function LessonForm({user,onBack,show}){
+  const initForm={...emptyForm(),teacherName:user.name,grade:user.grade,subject:user.subject,
+    month:getTodayMonth(),weekLabel:getWeekLabel()};
+  const [form,setForm]=useState(()=>{
+    const draft=lsGet('bps_draft_'+user.initials,null);
+    return draft||initForm;
+  });
+  const [tab,setTab]=useState(0);
+  const [preview,setPreview]=useState(false);
+  const [busy,setBusy]=useState(false);
+  const [errors,setErrors]=useState([]);
+  const [lastSaved,setLastSaved]=useState(null);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const setDay=(i,k,v)=>setForm(f=>{const s=[...f.schedule];s[i]={...s[i],[k]:v};return{...f,schedule:s}});
+  const setObj=(i,v)=>setForm(f=>{const o=[...f.objectives];o[i]=v;return{...f,objectives:o}});
+  const setRes=(i,v)=>setForm(f=>{const r=[...f.resources];r[i]=v;return{...f,resources:r}});
+
+  // Auto-save draft every 30s
+  useEffect(()=>{
+    const t=setInterval(()=>{
+      lsSet('bps_draft_'+user.initials,form);
+      setLastSaved(new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
+    },30000);
+    return()=>clearInterval(t);
+  },[form]);
+
+  const exportDocx=async(mode)=>{
+    const errs=validateForm(form);
+    if(errs.length&&mode!=='word'&&mode!=='onedrive'){
+      setErrors(errs);
+      show('⚠ Please fill required fields: '+errs.slice(0,3).join(', ')+(errs.length>3?'...':''),'error');
+      setTab(0);
+      return;
+    }
+    setErrors([]);
+    setBusy(true);
+    try{
+      const buf=await generateDocx(form);
+      const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const fname=`LessonPlan_${form.grade}_${(form.theme||'Plan').replace(/\s+/g,'_')}.docx`;
+      if(mode==='word'){show('🌐 In production: opens in Word Online via SharePoint link','info');}
+      else if(mode==='onedrive'){show('☁ In production: saved to OneDrive /LessonPlans/'+form.grade+'/','info');}
+      else{
+        // Save to localStorage plans list
+        const plans=lsGet(LS_KEY,[]);
+        const newPlan={id:Date.now(),title:`${form.theme} – ${form.subject}`,
+          date:`${form.dateFrom}–${form.dateTo} ${form.month}`,
+          grade:form.grade,subject:form.subject,status:mode==='final'?'final':'draft',form};
+        lsSet(LS_KEY,[newPlan,...plans.filter(p=>p.id!==newPlan.id)].slice(0,20));
+        if(mode==='final'){
+          lsSet('bps_draft_'+user.initials,null);
+        }
+        saveAs(blob,fname);
+        show('✅ DOCX downloaded: '+fname);
+      }
+    }catch(e){show('❌ Error: '+e.message,'error');}
+    setBusy(false);
+  };
+
+  const TABS=['📋 Basic','📚 Content','📅 Schedule','🧩 Diff.','🔗 Integration','📝 Reflection'];
+
+  return(
+    <div>
+      <div className="page-hdr">
+        <div>
+          <div className="page-title">New Lesson Plan</div>
+          <div className="page-sub">Fill all <span style={{color:'var(--coral)',fontWeight:800}}>★ required</span> fields, then export your DOCX</div>
+        </div>
+        <button className="btn btn-gray" onClick={onBack}>← Back to Plans</button>
+      </div>
+
+      <div className="ftabs">
+        {TABS.map((t,i)=><button key={i} className={`ftab${tab===i?' active':''}`} onClick={()=>setTab(i)}>{t}</button>)}
+      </div>
+
+      {/* TAB 0 — BASIC */}
+      {tab===0&&<>
+        <div className="fb">
+          <div className="fb-title">📋 Basic Details</div>
+          <div className="g2">
+            <div className="fg"><label className="fl">Teacher Name<span className="req">★</span><span className="ph">TeacherName</span></label><input className="fi" value={form.teacherName} onChange={e=>set('teacherName',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Grade<span className="req">★</span><span className="ph">Grade</span></label>
+              <select className="fs" value={form.grade} onChange={e=>set('grade',e.target.value)}><option>KG1</option><option>KG2</option></select>
+            </div>
+            <div className="fg"><label className="fl">Date From<span className="req">★</span></label><input className="fi" placeholder="e.g. 08" value={form.dateFrom} onChange={e=>set('dateFrom',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Date To<span className="req">★</span></label><input className="fi" placeholder="e.g. 10" value={form.dateTo} onChange={e=>set('dateTo',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Month & Year<span className="req">★</span><span className="ph">Month</span></label><input className="fi" placeholder="e.g. April 2025" value={form.month} onChange={e=>set('month',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Subject<span className="req">★</span><span className="ph">Subject</span></label>
+              <select className="fs" value={form.subject} onChange={e=>set('subject',e.target.value)}>
+                {['Literacy','Numeracy','Art','Music','General Studies','Knowing the World'].map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Theme<span className="req">★</span><span className="ph">Theme</span></label><input className="fi" placeholder="e.g. My Family" value={form.theme} onChange={e=>set('theme',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Topic<span className="req">★</span><span className="ph">Topic</span></label><input className="fi" placeholder="e.g. Family Members" value={form.topic} onChange={e=>set('topic',e.target.value)}/></div>
+            <div className="fg"><label className="fl">No. of Periods<span className="req">★</span><span className="ph">Periods</span></label>
+              <select className="fs" value={form.periods} onChange={e=>set('periods',e.target.value)}>
+                {['1','2','3','4','5','6','7','8'].map(n=><option key={n}>{n}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Week Label <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span></label><input className="fi" placeholder="e.g. Week 1" value={form.weekLabel} onChange={e=>set('weekLabel',e.target.value)}/></div>
+          </div>
+        </div>
+      </>}
+
+      {/* TAB 1 — CONTENT */}
+      {tab===1&&<>
+        <div className="fb">
+          <div className="fb-title">📚 Learning Resources</div>
+          {[0,1,2,3].map(i=><div key={i} className="fg"><label className="fl">Resource {i+1}</label><input className="fi" placeholder="e.g. Flash Cards" value={form.resources[i]} onChange={e=>setRes(i,e.target.value)}/></div>)}
+          <div className="fg"><label className="fl">Website Links <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span></label><textarea className="fta" rows={2} placeholder="YouTube / educational site URLs..." value={form.websiteLinks} onChange={e=>set('websiteLinks',e.target.value)}/></div>
+          <div className="fg"><label className="fl">Interactive Games <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span></label><input className="fi" placeholder="Game website or app" value={form.interactiveGames} onChange={e=>set('interactiveGames',e.target.value)}/></div>
+        </div>
+        <div className="fb">
+          <div className="fb-title">🔤 Vocabulary & Objectives</div>
+          <div className="fg"><label className="fl">Vocabulary Words<span className="req">★</span><span className="ph">Vocabulary</span></label><input className="fi" placeholder="e.g. mother, father, sister, brother (comma-separated)" value={form.vocabulary} onChange={e=>set('vocabulary',e.target.value)}/></div>
+          <div className="fg"><label className="fl">Feedback on Previous Week <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span><span className="ph">Feedback</span></label><textarea className="fta" rows={2} placeholder="What went well last week? What needs revisiting?" value={form.feedback} onChange={e=>set('feedback',e.target.value)}/></div>
+          <label className="fl" style={{marginBottom:8,display:'block'}}>Learning Objectives<span className="req">★</span><span className="ph">Objectives</span></label>
+          {[0,1,2].map(i=><div key={i} className="fg"><input className="fi" placeholder={`Objective ${i+1}...`} value={form.objectives[i]} onChange={e=>setObj(i,e.target.value)}/></div>)}
+          <div className="g3" style={{marginTop:4}}>
+            <div className="fg"><label className="fl">QNI Question <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span></label><input className="fi" placeholder="Question of the day..." value={form.qni} onChange={e=>set('qni',e.target.value)}/></div>
+            <div className="fg"><label className="fl">Daily Reflection <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span></label><input className="fi" placeholder="End-of-lesson prompt..." value={form.dailyReflection} onChange={e=>set('dailyReflection',e.target.value)}/></div>
+            <div className="fg"><label className="fl">SDG Link <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span><span className="ph">SDG</span></label><input className="fi" placeholder="e.g. SDG 4: Quality Education" value={form.sdg} onChange={e=>set('sdg',e.target.value)}/></div>
+          </div>
+        </div>
+      </>}
+
+      {/* TAB 2 — SCHEDULE */}
+      {tab===2&&<div className="fb">
+        <div className="fb-title">📅 Daily Schedule — Sunday to Thursday</div>
+        {form.schedule.map((s,i)=>(
+          <div key={i} className="day-row">
+            <div className="day-lbl">📌 {s.day}</div>
+            <div className="g2">
+              <div className="fg"><label className="fl">Activity / Methodology</label><textarea className="fta" rows={2} placeholder={`What will students do on ${s.day}?`} value={s.activity} onChange={e=>setDay(i,'activity',e.target.value)}/></div>
+              <div>
+                <div className="fg"><label className="fl">Classwork</label><input className="fi" value={s.classwork} onChange={e=>setDay(i,'classwork',e.target.value)}/></div>
+                <div className="fg"><label className="fl">Homework</label><input className="fi" value={s.homework} onChange={e=>setDay(i,'homework',e.target.value)}/></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>}
+
+      {/* TAB 3 — DIFFERENTIATION */}
+      {tab===3&&<div className="fb">
+        <div className="fb-title">🧩 Differentiated Learning<span className="req">★</span></div>
+        <div style={{fontSize:12,color:'var(--gray)',marginBottom:14}}>Provide a different task for each learning level. All three are required.</div>
+        <div className="diff-grid">
+          <div className="diff-card d-high">
+            <div className="d-lbl" style={{color:'#276749'}}>🟢 High Achievers<span className="ph">DiffHigh</span></div>
+            <textarea className="d-ta" rows={4} placeholder="Challenge task for advanced learners..." value={form.diffHigh} onChange={e=>set('diffHigh',e.target.value)}/>
+          </div>
+          <div className="diff-card d-med">
+            <div className="d-lbl" style={{color:'#744210'}}>🟡 Mid-Level<span className="ph">DiffMed</span></div>
+            <textarea className="d-ta" rows={4} placeholder="Standard activity with some guidance..." value={form.diffMed} onChange={e=>set('diffMed',e.target.value)}/>
+          </div>
+          <div className="diff-card d-low">
+            <div className="d-lbl" style={{color:'#822727'}}>🔴 Support Needed<span className="ph">DiffLow</span></div>
+            <textarea className="d-ta" rows={4} placeholder="Simplified task with teacher support..." value={form.diffLow} onChange={e=>set('diffLow',e.target.value)}/>
+          </div>
+        </div>
+      </div>}
+
+      {/* TAB 4 — INTEGRATION */}
+      {tab===4&&<div className="fb">
+        <div className="fb-title">🔗 Integration Areas <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)',fontSize:11}}>all optional</span></div>
+        <div className="g2">
+          {[['Literacy','intLiteracy'],['Numeracy','intNumeracy'],['Knowing the World','intWorld'],
+            ['Art','intArt'],['Story / Rhymes / Poems','intStory'],['Music / Song','intMusic'],['Games','intGames']
+          ].map(([l,k])=>(
+            <div key={k} className="fg">
+              <label className="fl">{l}<span className="ph">{`Int${k.replace('int','')}`}</span></label>
+              <input className="fi" placeholder={`How does ${l} connect this week?`} value={form[k]} onChange={e=>set(k,e.target.value)}/>
+            </div>
+          ))}
+        </div>
+        <div className="fg" style={{marginTop:8}}>
+          <label className="fl">Home Practice <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)'}}>optional</span><span className="ph">HomePractice</span></label>
+          <textarea className="fta" rows={3} placeholder="Activity parents can do at home with the child..." value={form.homePractice} onChange={e=>set('homePractice',e.target.value)}/>
+        </div>
+        <div style={{marginTop:14}}>
+          <div style={{fontSize:12,fontWeight:800,color:'var(--gray)',marginBottom:10}}>☑ Tick what you have planned for this week:</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
+            {[['valuesCheck','Values'],['resourcesCheck','Resources'],['assignCheck','Assignments'],
+              ['sdgCheck','SDG'],['activitiesCheck','Activities'],['worksheetsCheck','Worksheets']
+            ].map(([k,l])=>(
+              <label key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:13,cursor:'pointer',fontWeight:700}}>
+                <input type="checkbox" checked={form[k]} onChange={e=>set(k,e.target.checked)} style={{accentColor:'var(--teal)',width:15,height:15}}/>
+                {l}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>}
+
+      {/* TAB 5 — REFLECTION */}
+      {tab===5&&<div className="fb">
+        <div className="fb-title">📝 Teacher's Reflection <span style={{fontStyle:'italic',fontWeight:400,textTransform:'none',color:'var(--gray)',fontSize:11}}>fill after the lesson</span></div>
+        <div className="fg">
+          <label className="fl">Reflection<span className="ph">Reflection</span></label>
+          <textarea className="fta" rows={6} placeholder="How did the lesson go? What worked well? What would you change? How did the students respond?" value={form.reflection} onChange={e=>set('reflection',e.target.value)}/>
+        </div>
+        <div style={{background:'var(--teal-l)',borderRadius:'var(--radius-sm)',padding:12,fontSize:12,color:'var(--teal)',marginTop:4}}>
+          💡 This section is filled <strong>after</strong> the lesson is taught. Your coordinator may also add feedback here before the plan is marked Final.
+        </div>
+      </div>}
+
+      {/* PREVIEW MODAL */}
+      {preview&&(
+        <div className="modal-overlay" onClick={()=>setPreview(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-hdr">
+              <span>📄 Lesson Plan Preview</span>
+              <span className="modal-close" onClick={()=>setPreview(false)}>✕</span>
+            </div>
+            <div className="psect">
+              <div style={{textAlign:'center',background:'var(--teal)',color:'#fff',padding:12,borderRadius:8,marginBottom:12}}>
+                <strong>Birla Public School, Doha – Qatar</strong><br/>
+                Kindergarten Curriculum Plan · Lesson Plan 2025–26
+              </div>
+              <h3>Basic Info</h3>
+              <table className="ptbl"><tbody>
+                <tr><td><b>Teacher</b></td><td>{form.teacherName}</td><td><b>Grade</b></td><td>{form.grade}</td></tr>
+                <tr><td><b>Period</b></td><td>{form.dateFrom}–{form.dateTo} {form.month}</td><td><b>Subject</b></td><td>{form.subject}</td></tr>
+                <tr><td><b>Theme</b></td><td>{form.theme}</td><td><b>Topic</b></td><td>{form.topic}</td></tr>
+              </tbody></table>
+              <h3>Objectives</h3>
+              {form.objectives.filter(o=>o).map((o,i)=><p key={i} style={{fontSize:12,margin:'3px 0'}}>{i+1}. {o}</p>)}
+              <h3>Vocabulary</h3>
+              <p style={{fontSize:12}}>{form.vocabulary}</p>
+              <h3>Daily Schedule</h3>
+              <table className="ptbl">
+                <thead><tr><th>Day</th><th>Activity</th><th>Classwork</th><th>Homework</th></tr></thead>
+                <tbody>{form.schedule.map(s=><tr key={s.day}><td>{s.day}</td><td>{s.activity}</td><td>{s.classwork}</td><td>{s.homework}</td></tr>)}</tbody>
+              </table>
+              <h3>Differentiated Learning</h3>
+              <p style={{fontSize:12}}><b>🟢 High:</b> {form.diffHigh}</p>
+              <p style={{fontSize:12,marginTop:4}}><b>🟡 Med:</b> {form.diffMed}</p>
+              <p style={{fontSize:12,marginTop:4}}><b>🔴 Low:</b> {form.diffLow}</p>
+              <h3>Integration</h3>
+              {[['Literacy',form.intLiteracy],['Numeracy',form.intNumeracy],['Art',form.intArt],['Games',form.intGames]].filter(([,v])=>v).map(([k,v])=><p key={k} style={{fontSize:12,margin:'2px 0'}}><i>{k}:</i> {v}</p>)}
+              <h3>Teacher's Reflection</h3>
+              <p style={{fontSize:12}}>{form.reflection||'(not yet filled)'}</p>
+            </div>
+            <div style={{marginTop:16,display:'flex',gap:8}}>
+              <button className="btn btn-teal" onClick={()=>{setPreview(false);exportDocx('download')}}>⬇ Download DOCX</button>
+              <button className="btn btn-gray" onClick={()=>setPreview(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EXPORT BAR */}
+      {errors.length>0&&(
+        <div style={{background:'var(--coral-l)',border:'1.5px solid var(--coral)',borderRadius:'var(--radius-sm)',padding:'10px 14px',marginTop:10,fontSize:12,color:'var(--coral)'}}>
+          <strong>⚠ Missing required fields:</strong> {errors.join(' · ')}
+        </div>
+      )}
+      <div className="xbar">
+        <button className="btn btn-gray" onClick={onBack}>← Back</button>
+        <button className="btn btn-purple" onClick={()=>setPreview(true)}>👁 Preview</button>
+        <button className="btn btn-outline" disabled={busy} onClick={()=>exportDocx('download')}>⬇ Download DOCX</button>
+        <button className="btn btn-outline" disabled={busy} onClick={()=>exportDocx('word')}>🌐 Word Online</button>
+        <button className="btn btn-outline" disabled={busy} onClick={()=>exportDocx('onedrive')}>☁ OneDrive</button>
+        <button className="btn btn-teal" disabled={busy} onClick={()=>exportDocx('final')}>✔ Save as Final</button>
+        <span style={{marginLeft:'auto',fontSize:11,color:'var(--gray)'}}>
+          {busy?'⏳ Generating...':(lastSaved?`💾 Saved ${lastSaved}`:'Draft — saves every 30s')}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── LESSON PLANS TAB ── */
+function PlansTab({user,show}){
+  const [view,setView]=useState('list');
+  const [selTmpl,setSelTmpl]=useState(null);
+  const [gf,setGf]=useState('ALL');
+  const [plans,setPlans]=useState(()=>{
+    const saved=lsGet(LS_KEY,[]);
+    return saved.length?saved:SAVED_PLANS;
+  });
+  const filtered=TEMPLATES.filter(t=>gf==='ALL'||t.grade===gf||t.grade==='BOTH');
+
+  const deletePlan=(id)=>{
+    const updated=plans.filter(p=>p.id!==id);
+    setPlans(updated);
+    lsSet(LS_KEY,updated);
+    show('🗑 Plan deleted');
+  };
+
+  if(view==='form')return<LessonForm user={user} onBack={()=>{setView('list');setPlans(lsGet(LS_KEY,SAVED_PLANS));}} show={show}/>;
+
+  if(view==='tmpl')return(
+    <div>
+      <div className="page-hdr">
+        <div><div className="page-title">Choose a Template</div><div className="page-sub">Select the plan format for your class</div></div>
+        <button className="btn btn-gray" onClick={()=>setView('list')}>← Back</button>
+      </div>
+      <div style={{display:'flex',gap:7,marginBottom:14}}>
+        {['ALL','KG1','KG2'].map(g=><button key={g} className={`btn ${gf===g?'btn-teal':'btn-gray'}`} onClick={()=>setGf(g)}>{g}</button>)}
+      </div>
+      <div className="tmpl-grid">
+        {filtered.map(t=>(
+          <div key={t.id} className={`tmpl-card${selTmpl?.id===t.id?' sel':''}`} onClick={()=>setSelTmpl(t)}>
+            <div className="tmpl-icon">{t.icon}</div>
+            <div className="tmpl-name">{t.name}</div>
+            <div className="tmpl-desc">{t.desc}</div>
+            <span className="badge badge-teal">{t.grade}</span>
+          </div>
+        ))}
+      </div>
+      <div className="xbar">
+        <button className="btn btn-gray" onClick={()=>setView('list')}>← Back</button>
+        <button className="btn btn-teal" disabled={!selTmpl} onClick={()=>setView('form')}>
+          Use: {selTmpl?.name||'Select a template'} →
+        </button>
+      </div>
+    </div>
+  );
+
+  return(
+    <div>
+      <div className="page-hdr">
+        <div>
+          <div className="page-title">Lesson Plans</div>
+          <div className="page-sub">Your saved and draft plans — {plans.length} total</div>
+        </div>
+        <button className="btn btn-teal" onClick={()=>setView('tmpl')}>+ New Plan</button>
+      </div>
+      {plans.length===0&&(
+        <div style={{textAlign:'center',padding:'48px 24px',background:'#fff',borderRadius:'var(--radius)',border:'1px solid var(--gray-m)'}}>
+          <div style={{fontSize:40,marginBottom:12}}>📋</div>
+          <div style={{fontWeight:800,color:'var(--gray-d)',marginBottom:6}}>No lesson plans yet</div>
+          <div style={{fontSize:12,color:'var(--gray)',marginBottom:16}}>Create your first plan using a template</div>
+          <button className="btn btn-teal" onClick={()=>setView('tmpl')}>+ Create First Plan</button>
+        </div>
+      )}
+      {plans.map(p=>(
+        <div key={p.id} className="plan-item">
+          <div style={{flex:1}}>
+            <div className="plan-name">{p.title}</div>
+            <div className="plan-meta">{p.date} · Grade {p.grade} · {p.subject}</div>
+          </div>
+          <div style={{display:'flex',gap:7,alignItems:'center'}}>
+            <span className={`badge status-${p.status||'draft'}`}>{p.status||'draft'}</span>
+            <button className="btn btn-outline" style={{padding:'5px 10px',fontSize:10}} onClick={async()=>{
+              show('⏳ Generating DOCX...','info');
+              const f=p.form||{...emptyForm(),teacherName:user.name,grade:p.grade,subject:p.subject,
+                theme:p.title,topic:'Lesson',dateFrom:'',dateTo:'',month:getTodayMonth(),
+                periods:'5',objectives:['See lesson plan']};
+              const buf=await generateDocx(f);
+              const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+              saveAs(blob,`${(p.title||'Plan').replace(/\s+/g,'_')}.docx`);
+              show('✅ DOCX downloaded!');
+            }}>⬇ DOCX</button>
+            <button className="btn btn-gray" style={{padding:'5px 10px',fontSize:10}} onClick={()=>deletePlan(p.id)}>🗑</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── WORKSHEETS TAB ── */
+function WorksheetsTab({show}){
+  const sheets=[
+    {name:'Alphabet Tracing A–Z',grade:'KG1',subject:'Literacy',icon:'✏️',desc:'Trace uppercase and lowercase letters'},
+    {name:'Numbers 1–10 Worksheet',grade:'KG1',subject:'Numeracy',icon:'🔢',desc:'Count, trace and write numbers'},
+    {name:'My Family Colouring',grade:'KG2',subject:'Art',icon:'🎨',desc:'Colour and label family members'},
+    {name:'Phonics – Initial Sounds',grade:'KG2',subject:'Literacy',icon:'🔤',desc:'Match pictures to beginning sounds'},
+    {name:'Shapes Recognition',grade:'BOTH',subject:'Numeracy',icon:'🔷',desc:'Identify and name 2D shapes'},
+    {name:'Sight Words Practice',grade:'KG2',subject:'Literacy',icon:'👁',desc:'Read and trace sight word list'},
+    {name:'Pattern Completion',grade:'KG1',subject:'Numeracy',icon:'🔴',desc:'Complete the AB, AAB patterns'},
+    {name:'Story Sequencing',grade:'KG2',subject:'Literacy',icon:'📖',desc:'Cut and arrange story pictures in order'},
+  ];
+  return(
+    <div>
+      <div className="page-hdr">
+        <div><div className="page-title">Worksheets</div><div className="page-sub">Pre-built activity sheets — click to download</div></div>
+      </div>
+      <div className="tmpl-grid">
+        {sheets.map((s,i)=>(
+          <div key={i} className="tmpl-card" onClick={()=>show(`⬇ "${s.name}" worksheet ready to download`)}>
+            <div className="tmpl-icon">{s.icon}</div>
+            <div className="tmpl-name">{s.name}</div>
+            <div className="tmpl-desc">{s.desc}</div>
+            <span className="badge badge-blue">{s.grade}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── ATTENDANCE TAB ── */
+function AttendanceTab({show}){
+  const [students,setStudents]=useState(()=>lsGet(LS_ATT,MOCK_STUDENTS));
+  const cols=['Sun','Mon','Tue','Wed','Thu'];
+  const toggle=(id,day)=>setStudents(ss=>ss.map(s=>{
+    if(s.id!==id)return s;
+    const nx=s.att[day]==='P'?'A':s.att[day]==='A'?'L':'P';
+    return{...s,att:{...s.att,[day]:nx}};
+  }));
+  const sum=day=>({P:students.filter(s=>s.att[day]==='P').length,A:students.filter(s=>s.att[day]==='A').length,L:students.filter(s=>s.att[day]==='L').length});
+  return(
+    <div>
+      <div className="page-hdr">
+        <div><div className="page-title">Attendance Register</div><div className="page-sub">Click any cell to toggle P → A → L · Grade KG2 – Section A</div></div>
+        <div style={{display:'flex',gap:8}}>
+          <button className="btn btn-outline" onClick={()=>show('📊 Attendance report exported','info')}>Export CSV</button>
+          <button className="btn btn-teal" onClick={()=>{lsSet(LS_ATT,students);show('✅ Attendance saved!')}}>Save Today</button>
+        </div>
+      </div>
+      <div className="card" style={{padding:0,overflow:'auto'}}>
+        <table className="att-tbl">
+          <thead><tr>
+            <th style={{textAlign:'left',paddingLeft:14}}>Student</th>
+            <th>Level</th>
+            {cols.map(d=><th key={d}>{d}</th>)}
+            <th>Present</th>
+          </tr></thead>
+          <tbody>
+            {students.map(s=>{
+              const pc=Object.values(s.att).filter(v=>v==='P').length;
+              return(
+                <tr key={s.id}>
+                  <td style={{fontWeight:700,fontSize:12}}>{s.name}</td>
+                  <td><span className={`badge ${s.level==='H'?'badge-green':s.level==='M'?'badge-amber':'badge-coral'}`}>{s.level}</span></td>
+                  {cols.map(d=><td key={d}><button className={`att-btn att-${s.att[d]}`} onClick={()=>toggle(s.id,d)}>{s.att[d]}</button></td>)}
+                  <td style={{fontWeight:800,color:pc>=4?'var(--green)':'var(--coral)'}}>{pc}/5</td>
+                </tr>
+              );
+            })}
+            <tr className="att-summary">
+              <td colSpan={2} style={{fontWeight:800,paddingLeft:14,background:'var(--gray-l)'}}>Summary</td>
+              {cols.map(d=>{const{P,A,L}=sum(d);return<td key={d} style={{fontSize:10,background:'var(--gray-l)'}}>
+                <span style={{color:'var(--green)'}}>P:{P}</span> <span style={{color:'var(--coral)'}}>A:{A}</span> <span style={{color:'var(--amber)'}}>L:{L}</span>
+              </td>})}
+              <td style={{background:'var(--gray-l)'}}></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style={{fontSize:11,color:'var(--gray)',marginTop:8}}>
+        🟢 P = Present &nbsp;·&nbsp; 🔴 A = Absent &nbsp;·&nbsp; 🟡 L = Late &nbsp;·&nbsp; Level: H = High · M = Mid · L = Low achiever
+      </div>
+    </div>
+  );
+}
+
+/* ── REPORT CARDS TAB ── */
+function ReportsTab({user,show}){
+  const subjects=['Literacy','Numeracy','Art','P.E.','General Studies'];
+  const [grades,setGrades]=useState(()=>{
+    const saved=lsGet(LS_GRADES,null);
+    if(saved)return saved;
+    const g={};
+    MOCK_STUDENTS.forEach(s=>{g[s.id]={};subjects.forEach(sub=>{g[s.id][sub]='';});});
+    return g;
+  });
+  const setG=(sid,sub,val)=>setGrades(g=>{
+    const updated={...g,[sid]:{...g[sid],[sub]:val}};
+    lsSet(LS_GRADES,updated);
+    return updated;
+  });
+  return(
+    <div>
+      <div className="page-hdr">
+        <div><div className="page-title">Report Cards</div><div className="page-sub">Enter grades per subject — export as DOCX for each student</div></div>
+        <div style={{display:'flex',gap:8}}>
+          <button className="btn btn-outline" onClick={()=>show('📋 All report cards exported as one PDF (production)','info')}>Export All PDF</button>
+          <button className="btn btn-teal" onClick={async()=>{
+            show('⏳ Generating sample report DOCX...','info');
+            const f={...emptyForm(),teacherName:user.name,grade:user.grade,subject:'End of Term Report',
+              theme:'Student Progress Report',topic:'Term 2 2025',dateFrom:'',dateTo:'',month:'May 2025',
+              objectives:subjects.map(s=>`${s}: ${Object.values(grades).map(g=>g[s]).filter(Boolean)[0]||'—'}`)};
+            const buf=await generateDocx(f);
+            const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+            saveAs(blob,'ReportCard_KG2_Term2.docx');
+            show('✅ Report Card DOCX downloaded!');
+          }}>⬇ Export DOCX</button>
+        </div>
+      </div>
+      <div style={{fontSize:11,color:'var(--amber)',background:'var(--amber-l)',padding:'8px 14px',borderRadius:'var(--radius-sm)',marginBottom:14}}>
+        💡 Grade scale: <strong>A</strong> = Outstanding &nbsp; <strong>B</strong> = Good &nbsp; <strong>C</strong> = Developing &nbsp; <strong>D</strong> = Needs Support
+      </div>
+      <div className="card" style={{padding:0,overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+          <thead><tr>
+            <th style={{background:'var(--teal)',color:'#fff',padding:'8px 14px',textAlign:'left',fontSize:11}}>Student</th>
+            {subjects.map(s=><th key={s} style={{background:'var(--teal)',color:'#fff',padding:'8px 10px',fontSize:11}}>{s}</th>)}
+            <th style={{background:'var(--teal)',color:'#fff',padding:'8px 10px',fontSize:11}}>Action</th>
+          </tr></thead>
+          <tbody>
+            {MOCK_STUDENTS.map((s,ri)=>(
+              <tr key={s.id} style={{background:ri%2?'var(--gray-l)':'#fff'}}>
+                <td style={{padding:'8px 14px',fontWeight:700}}>{s.name}</td>
+                {subjects.map(sub=>(
+                  <td key={sub} style={{padding:'6px 8px',textAlign:'center'}}>
+                    <select style={{width:52,padding:'4px 6px',border:'1.5px solid var(--gray-m)',borderRadius:6,fontFamily:'var(--ff)',fontSize:12,background:'transparent',textAlign:'center'}}
+                      value={grades[s.id][sub]} onChange={e=>setG(s.id,sub,e.target.value)}>
+                      <option value="">—</option>
+                      {['A','B','C','D'].map(g=><option key={g}>{g}</option>)}
+                    </select>
+                  </td>
+                ))}
+                <td style={{padding:'6px 8px',textAlign:'center'}}>
+                  <button className="btn btn-outline" style={{padding:'4px 10px',fontSize:10}} onClick={()=>show(`📄 Report card for ${s.name} ready (production)`)}>DOCX</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ── PARENT COMMS TAB ── */
+function CommTab({user,show}){
+  const [subj,setSubj]=useState('');
+  const [msg,setMsg]=useState('');
+  const msgs=[
+    {p:"Mrs. Al-Mansouri",preview:"Thank you for Aisha's progress update. She's been practising at home!",date:'29 Apr'},
+    {p:'Mr. Hassan',preview:'Could you share the Tuesday homework sheet? Rania missed school.',date:'28 Apr'},
+    {p:'Mrs. Al-Farsi',preview:'Yusuf loved the family activity! He drew his whole family tree.',date:'27 Apr'},
+  ];
+  return(
+    <div>
+      <div className="page-hdr">
+        <div><div className="page-title">Parent Communication</div><div className="page-sub">Send newsletters, updates and messages to parents</div></div>
+      </div>
+      <div className="card">
+        <div className="card-title">📨 New Message / Newsletter</div>
+        <div className="fg"><label className="fl">Subject</label><input className="fi" placeholder="e.g. Week 18 Update – My Family Theme" value={subj} onChange={e=>setSubj(e.target.value)}/></div>
+        <div className="fg"><label className="fl">Message</label><textarea className="fta" rows={4} placeholder="Dear Parents,&#10;This week we are learning about..." value={msg} onChange={e=>setMsg(e.target.value)}/></div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:4}}>
+          <button className="btn btn-teal" onClick={()=>{show('📧 Newsletter sent to all 8 parents!');setSubj('');setMsg('');}}>Send to All Parents</button>
+          <button className="btn btn-outline" onClick={async()=>{
+            if(!subj&&!msg){show('Please fill subject and message','error');return;}
+            show('⏳ Generating newsletter DOCX...','info');
+            const f={...emptyForm(),teacherName:user.name,grade:user.grade,theme:subj||'Weekly Update',
+              topic:'Parent Newsletter',month:'May 2025',subject:'General',objectives:[msg||'See newsletter'],
+              dateFrom:'',dateTo:''};
+            const buf=await generateDocx(f);
+            saveAs(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),`Newsletter_${(subj||'Update').replace(/\s+/g,'_')}.docx`);
+            show('✅ Newsletter DOCX ready!');
+          }}>⬇ Export as DOCX</button>
+          <button className="btn btn-gray" onClick={()=>show('☁ Saved to OneDrive /Newsletters/','info')}>☁ Save to OneDrive</button>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-title">💬 Recent Parent Messages</div>
+        {msgs.map((m,i)=>(
+          <div key={i} style={{display:'flex',gap:10,alignItems:'flex-start',padding:'10px 0',borderBottom:i<msgs.length-1?'1px solid var(--gray-m)':'none'}}>
+            <div style={{width:34,height:34,borderRadius:'50%',background:'var(--blue-l)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,color:'var(--blue)',fontSize:12,flexShrink:0}}>
+              {m.p.split(' ').map(w=>w[0]).join('').slice(0,2)}
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:800}}>{m.p}</div>
+              <div style={{fontSize:11,color:'var(--gray)',marginTop:2}}>{m.preview}</div>
+            </div>
+            <div style={{fontSize:10,color:'var(--gray)',flexShrink:0}}>{m.date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── HELP TAB ── */
+function HelpTab(){
+  const fields=[
+    ['Teacher Name','TeacherName','Text','Required','Auto-filled from your login profile'],
+    ['Grade','Grade','Dropdown KG1/KG2','Required','Affects template scaling'],
+    ['Date From / To','DateFrom, DateTo','Text (day number)','Required','e.g. 08, 10'],
+    ['Month & Year','Month','Text','Required','e.g. April 2025'],
+    ['Subject','Subject','Dropdown','Required','Literacy, Numeracy, Art...'],
+    ['Theme','Theme','Text','Required','e.g. My Family'],
+    ['Topic','Topic','Text','Required','Specific lesson topic'],
+    ['No. of Periods','Periods','Number 1–8','Required','Periods this week'],
+    ['Learning Resources','Resources[]','Text × 4','Required','Physical materials used'],
+    ['Website Links','WebLinks','Text','Optional','YouTube / education sites'],
+    ['Interactive Games','InteractiveGames','Text','Optional','Online game links'],
+    ['Vocabulary','Vocabulary','Comma-separated','Required','New words for the week'],
+    ['Feedback (prev. week)','Feedback','Textarea','Optional','Previous week notes'],
+    ['Objectives','Objectives[]','Textarea × 3','Required','What students will learn'],
+    ['QNI Question','QNI','Text','Optional','Daily question prompt'],
+    ['Daily Reflection','DailyReflection','Text','Optional','End-of-lesson prompt'],
+    ['SDG Link','SDG','Text','Optional','Sustainability goal link'],
+    ['Schedule (5 days)','Schedule[]','Per-day inputs','Required','Activity + CW + HW'],
+    ['Differentiated – High','DiffHigh','Textarea','Required','Challenge task'],
+    ['Differentiated – Med','DiffMed','Textarea','Required','Standard task'],
+    ['Differentiated – Low','DiffLow','Textarea','Required','Supported task'],
+    ['Integration (7 areas)','IntXxx','Text × 7','Optional','Cross-curricular links'],
+    ['Home Practice','HomePractice','Textarea','Optional','Parent activity'],
+    ['Tick Boxes (6)','ValuesCheck etc','Checkbox','Optional','Planning checklist'],
+    ['Teacher Reflection','Reflection','Textarea','Optional','Post-lesson notes'],
+  ];
+  return(
+    <div>
+      <div className="page-hdr"><div><div className="page-title">Help Guide</div><div className="page-sub">Everything you need to know about the KG Teacher Portal</div></div></div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}>
+        {[
+          {icon:'🔴',title:'Required Fields (★)',body:'These must be filled before you can export. They appear with a red ★ star next to the label.'},
+          {icon:'🔵',title:'Auto-filled Fields',body:'Teacher name and grade are automatically filled from your login. You can still change them.'},
+          {icon:'⬜',title:'Optional Fields',body:'These add detail to your plan but can be left blank. Examples: SDG, QNI, Reflection.'},
+          {icon:'📄',title:'DOCX Export',body:'Click "Download DOCX" to get a Word file matching the official Birla lesson plan template exactly.'},
+          {icon:'🌐',title:'Word Online',body:'Saves your plan to OneDrive and opens Word Online — production requires Azure tenant connection.'},
+          {icon:'🖨️',title:'Print Mode',body:'Click "Print View" in the sidebar. The app hides navigation and shows only the plan in print format.'},
+        ].map((h,i)=>(
+          <div key={i} className="card" style={{marginBottom:0}}>
+            <div className="card-title">{h.icon} {h.title}</div>
+            <p style={{fontSize:12,color:'var(--gray)',lineHeight:1.7}}>{h.body}</p>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <div className="card-title">🗂 Complete Field Reference — All 25 Placeholders</div>
+        <div style={{overflowX:'auto'}}>
+          <table className="fgtbl">
+            <thead><tr><th>Field Name</th><th>Placeholder</th><th>Input Type</th><th>Required?</th><th>Notes</th></tr></thead>
+            <tbody>
+              {fields.map(([f,p,t,r,n],i)=>(
+                <tr key={i}>
+                  <td style={{fontWeight:700}}>{f}</td>
+                  <td><span style={{fontFamily:'monospace',fontSize:10,background:'var(--purple-l)',color:'var(--purple)',padding:'1px 5px',borderRadius:3}}>{p}</span></td>
+                  <td style={{color:'var(--gray)'}}>{t}</td>
+                  <td><span className={`badge ${r==='Required'?'badge-coral':'badge-gray'}`}>{r}</span></td>
+                  <td style={{color:'var(--gray)',fontSize:11}}>{n}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── SETTINGS TAB ── */
+function SettingsTab({user,show}){
+  const clearDraft=()=>{lsSet('bps_draft_'+user.initials,null);show('🧹 Draft cleared');};
+  const clearAll=()=>{
+    if(window.confirm('Clear ALL saved data? This cannot be undone.')){
+      localStorage.removeItem(LS_KEY);
+      localStorage.removeItem(LS_ATT);
+      localStorage.removeItem(LS_GRADES);
+      localStorage.removeItem('bps_draft_'+user.initials);
+      show('🧹 All data cleared — refresh to start fresh');
+    }
+  };
+  return(
+    <div>
+      <div className="page-hdr"><div><div className="page-title">Settings</div><div className="page-sub">App preferences and data management</div></div></div>
+      <div className="card">
+        <div className="card-title">👩‍🏫 Current Profile</div>
+        <div className="g2">
+          <div><div style={{fontSize:11,color:'var(--gray)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4}}>Name</div><div style={{fontWeight:800}}>{user.name}</div></div>
+          <div><div style={{fontSize:11,color:'var(--gray)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4}}>Grade & Subject</div><div style={{fontWeight:800}}>Grade {user.grade} · {user.subject}</div></div>
+        </div>
+        <div style={{marginTop:12,fontSize:12,color:'var(--gray)',background:'var(--blue-l)',padding:'8px 12px',borderRadius:'var(--radius-sm)'}}>
+          🔵 In production, your profile auto-fills from your Microsoft 365 account. No manual entry needed.
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-title">💾 Data Storage</div>
+        <p style={{fontSize:12,color:'var(--gray)',marginBottom:14,lineHeight:1.7}}>
+          This demo saves your data in your browser's local storage. Data persists across page refreshes but is tied to this browser and device. In production, data is stored securely in the school's PostgreSQL database and OneDrive.
+        </p>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <button className="btn btn-amber" onClick={clearDraft}>🧹 Clear Draft Plan</button>
+          <button className="btn btn-coral" onClick={clearAll}>⚠ Clear All Saved Data</button>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-title">🗺 Production Roadmap</div>
+        {[
+          {phase:'Phase 1',label:'Microsoft SSO Auth',desc:'Replace mock login with real Azure Entra ID',done:false},
+          {phase:'Phase 2',label:'PostgreSQL Backend',desc:'Node.js API + Prisma ORM for persistent storage',done:false},
+          {phase:'Phase 3',label:'Server DOCX Engine',desc:'docxtemplater on server for larger templates',done:false},
+          {phase:'Phase 4',label:'OneDrive Integration',desc:'Real Microsoft Graph API file save + versioning',done:false},
+          {phase:'Phase 5–9',label:'Attendance, Reports, Comms, Governance',desc:'Full production features',done:false},
+        ].map((r,i)=>(
+          <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:'1px solid var(--gray-m)',alignItems:'flex-start'}}>
+            <span className={`badge ${r.done?'badge-green':'badge-gray'}`} style={{flexShrink:0,marginTop:2}}>{r.done?'✓':r.phase}</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:13}}>{r.label}</div>
+              <div style={{fontSize:11,color:'var(--gray)',marginTop:2}}>{r.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   ROOT APP
+═══════════════════════════════════════════ */
+function App(){
+  const [user,setUser]=useState(null);
+  const [tab,setTab]=useState('dashboard');
+  const {toast,show}=useToast();
+
+  if(!user)return<LoginPage onLogin={u=>setUser(u)}/>;
+
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100vh'}}>
+      <Topbar user={user} onSignOut={()=>{setUser(null);setTab('dashboard');}}/>
+      <div className="main-wrap">
+        <Sidebar tab={tab} setTab={setTab}/>
+        <div className="content-area">
+          {tab==='dashboard'    &&<Dashboard user={user} setTab={setTab} show={show}/>}
+          {tab==='plans'        &&<PlansTab user={user} show={show}/>}
+          {tab==='worksheets'   &&<WorksheetsTab show={show}/>}
+          {tab==='attendance'   &&<AttendanceTab show={show}/>}
+          {tab==='reports'      &&<ReportsTab user={user} show={show}/>}
+          {tab==='communication'&&<CommTab user={user} show={show}/>}
+          {tab==='help'         &&<HelpTab/>}
+          {tab==='settings'     &&<SettingsTab user={user} show={show}/>}
+        </div>
+      </div>
+      <Toast toast={toast} onDone={()=>show(null)}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
